@@ -69,12 +69,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOp
           isActive={currentView === 'drafts'}
           onClick={() => handleNavClick('drafts')}
         />
-        <NavItem
+        {/* <NavItem
           icon={<ClockIcon className="w-5 h-5" />}
           label="Scheduled"
           isActive={currentView === 'scheduled'}
           onClick={() => handleNavClick('scheduled')}
-        />
+        /> */}
       </nav>
       <div className="mt-auto pt-6 border-t border-gray-700/50">
         <div className="group relative p-3 mb-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors">
