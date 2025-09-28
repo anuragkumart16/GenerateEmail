@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import type { View, Template, Draft, Gapi, GoogleTokenResponse, UserProfile } from './types';
+import type { View, Template, Draft, Gapi, GoogleTokenResponse, UserProfile, ScheduledEmail } from './types';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import ComposeView from './components/ComposeView';
 import TemplatesView from './components/TemplatesView';
 import DraftsView from './components/DraftsView';
+import ScheduledView from './components/ScheduledView';
 import { DEFAULT_TEMPLATES } from './constants';
 import { useGoogleAuth } from './useGoogleAuth';
 import { listDrafts, getDraft } from './services/gmailService';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>('compose');
   const [templates, setTemplates] = useState<Template[]>(DEFAULT_TEMPLATES);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [scheduledEmails, setScheduledEmails] = useState<ScheduledEmail[]>([]);
   const [activeInstruction, setActiveInstruction] = useState<string>('');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [initialDraft, setInitialDraft] = useState<Draft | null>(null);
@@ -66,13 +68,21 @@ const App: React.FC = () => {
     setActiveInstruction('');
   };
 
+  const addScheduledEmail = (email: ScheduledEmail) => {
+    setScheduledEmails(prev => [...prev, email]);
+  };
+
+  const cancelScheduledEmail = (id: string) => {
+    setScheduledEmails(prev => prev.filter(email => email.id !== id));
+  };
+
   const renderView = () => {
     switch (view) {
       case 'compose':
         return <ComposeView 
                   key={initialDraft?.id || activeInstruction} 
                   initialInstruction={activeInstruction} 
-                  addScheduledEmail={() => {}} 
+                  addScheduledEmail={addScheduledEmail}
                   templates={templates} 
                   token={token}
                   initialDraft={initialDraft}
@@ -82,8 +92,10 @@ const App: React.FC = () => {
         return <TemplatesView templates={templates} addTemplate={addTemplate} deleteTemplate={deleteTemplate} useTemplate={useTemplate} />;
       case 'drafts':
         return <DraftsView drafts={drafts} useDraft={useDraft} fetchDrafts={fetchDrafts} />;
+      case 'scheduled':
+        return <ScheduledView scheduledEmails={scheduledEmails} cancelScheduledEmail={cancelScheduledEmail} />;
       default:
-        return <ComposeView initialInstruction="" addScheduledEmail={() => {}} templates={templates} token={token} initialDraft={null} onEmailSent={resetComposeView} />;
+        return <ComposeView initialInstruction="" addScheduledEmail={addScheduledEmail} templates={templates} token={token} initialDraft={null} onEmailSent={resetComposeView} />;
     }
   };
 

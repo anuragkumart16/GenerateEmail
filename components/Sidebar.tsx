@@ -1,6 +1,6 @@
 import React from 'react';
 import type { View, UserProfile } from '../types';
-import { ComposeIcon, TemplatesIcon, DraftsIcon, WandIcon, SignOutIcon, XIcon } from './icons';
+import { ComposeIcon, TemplatesIcon, DraftsIcon, WandIcon, SignOutIcon, XIcon, ClockIcon } from './icons';
 
 interface SidebarProps {
   currentView: View;
@@ -68,6 +68,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, isOpen, setIsOp
           label="Drafts"
           isActive={currentView === 'drafts'}
           onClick={() => handleNavClick('drafts')}
+        />
+        <NavItem
+          icon={<ClockIcon className="w-5 h-5" />}
+          label="Scheduled"
+          isActive={currentView === 'scheduled'}
+          onClick={() => handleNavClick('scheduled')}
         />
       </nav>
       <div className="mt-auto pt-6 border-t border-gray-700/50">

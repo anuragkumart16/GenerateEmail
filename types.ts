@@ -1,4 +1,4 @@
-export type View = 'compose' | 'templates' | 'drafts';
+export type View = 'compose' | 'templates' | 'drafts' | 'scheduled';
 
 export interface Template {
   id: string;
@@ -55,6 +55,12 @@ export interface UserProfile {
   name: string;
   email: string;
   picture: string;
+}
+
+// Add ScheduledEmail interface
+export interface ScheduledEmail extends Email {
+  id: string;
+  scheduledAt: Date;
 }
 
 // FIX: Add type definition for window.google to resolve errors in useGoogleAuth.tsx

@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { generateEmailBody } from '../services/geminiService';
 import { sendEmail, createDraft } from '../services/gmailService';
-import type { Template, GoogleTokenResponse, Draft, Email } from '../types';
-import { SendIcon, WandIcon, BoldIcon, ItalicIcon, UnderlineIcon, ListIcon, ListOrderedIcon, PaperclipIcon, XIcon, DraftsIcon } from './icons';
+import type { Template, GoogleTokenResponse, Draft, Email, ScheduledEmail } from '../types';
+import ScheduleModal from './ScheduleModal';
+import { SendIcon, WandIcon, BoldIcon, ItalicIcon, UnderlineIcon, ListIcon, ListOrderedIcon, PaperclipIcon, XIcon, DraftsIcon, ClockIcon } from './icons';
 
 interface ComposeViewProps {
   initialInstruction: string;
-  addScheduledEmail: (email: any) => void;
+  addScheduledEmail: (email: ScheduledEmail) => void;
   templates: Template[];
   token: GoogleTokenResponse | null;
   initialDraft: Draft | null;
@@ -82,6 +83,7 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -261,6 +263,9 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
         <button onClick={handleSaveDraft} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
             <DraftsIcon className="w-5 h-5"/> Save Draft
         </button>
+        <button onClick={() => setShowScheduleModal(true)} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+            <ClockIcon className="w-5 h-5"/> Schedule
+        </button>
         <button onClick={() => fileInputRef.current?.click()} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
             <PaperclipIcon className="w-5 h-5"/> Attach File
         </button>
@@ -271,6 +276,30 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
           {toastMessage}
         </div>
       )}
+
+      <ScheduleModal
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        onSchedule={(scheduledAt) => {
+          if (!to || !subject || !body.trim()) {
+            showToast('Please fill in all required fields before scheduling.');
+            return;
+          }
+          
+          const scheduledEmail: ScheduledEmail = {
+            id: crypto.randomUUID(),
+            to,
+            subject,
+            body,
+            attachments,
+            scheduledAt
+          };
+          
+          addScheduledEmail(scheduledEmail);
+          showToast('Email scheduled successfully!');
+          clearForm();
+        }}
+      />
     </div>
   );
 };
