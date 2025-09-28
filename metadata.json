@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Mail Composer",
+  "description": "An intelligent email assistant powered by Gemini. Generate, refine, and manage your emails with AI-driven instructions and templates. Features mock sending and scheduling for a complete email composition experience.",
+  "requestFramePermissions": []
+}
