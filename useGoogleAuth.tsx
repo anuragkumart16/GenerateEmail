@@ -34,6 +34,7 @@ export const useGoogleAuth = () => {
       });
     }
 
+    console.log('[Auth] Signing out: Clearing token, user data, and localStorage');
     setToken(null);
     setUser(null);
     localStorage.removeItem("google_token");
@@ -65,6 +66,7 @@ export const useGoogleAuth = () => {
           email: profile.email,
           picture: profile.picture || "",
         };
+        console.log('[Auth] Successfully fetched user profile:', { email: profile.email });
 
         setUser(userProfile);
         localStorage.setItem("google_user", JSON.stringify(userProfile));
@@ -87,6 +89,7 @@ export const useGoogleAuth = () => {
   // ---- HANDLE AUTH RESPONSE ----
   const handleAuthResponse = useCallback(
     (tokenResponse: GoogleTokenResponse) => {
+      console.log('[Auth] Received token response:', { expiresIn: tokenResponse.expires_in });
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
 
       const expiryDate = Date.now() + tokenResponse.expires_in * 1000;
@@ -96,6 +99,7 @@ export const useGoogleAuth = () => {
         expiry_date: expiryDate,
       };
 
+      console.log('[Auth] Setting token and storing in localStorage');
       setToken(tokenWithExpiry);
       localStorage.setItem("google_token", JSON.stringify(tokenWithExpiry));
       fetchUserProfile(tokenResponse.access_token);
@@ -130,8 +134,10 @@ export const useGoogleAuth = () => {
 
   // ---- SIGN IN ----
   const handleSignIn = useCallback(() => {
+    console.log('[Auth] Starting sign-in process...');
     if (tokenClient) {
       try {
+        console.log('[Auth] Requesting access token with consent...');
         tokenClient.requestAccessToken({ prompt: "consent" });
       } catch (error) {
         console.error("Error requesting access token:", error);
@@ -146,6 +152,7 @@ export const useGoogleAuth = () => {
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || !window.google) return;
 
+    console.log('[Auth] Initializing Google OAuth client...');
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: GMAIL_SCOPES,

@@ -73,7 +73,7 @@ const parseDraft = (draft: Draft): Email => {
 }
 
 
-const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates, token, initialDraft, onEmailSent }) => {
+const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, addScheduledEmail, templates, token, initialDraft, onEmailSent }) => {
   const [draftId, setDraftId] = useState<string | undefined>(undefined);
   const [to, setTo] = useState('');
   const [subject, setSubject] = useState('');
@@ -200,31 +200,31 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
   };
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="min-h-0 flex flex-col gap-4 overflow-y-auto">
       <h2 className="text-2xl font-bold text-white hidden md:block">Compose Email</h2>
-      <div className="flex flex-col md:flex-row flex-1 gap-4 overflow-hidden">
+      <div className="flex flex-col md:flex-row gap-4 min-h-0">
         {/* Email Editor */}
-        <div className="md:w-2/3 flex flex-col gap-4">
+        <div className="md:w-2/3 flex flex-col gap-4 min-h-0">
           <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
             <label htmlFor="to" className="text-sm font-medium text-gray-400">To:</label>
             <input id="to" type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder="recipient@example.com" className="bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500" />
             <label htmlFor="subject" className="text-sm font-medium text-gray-400">Subject:</label>
             <input id="subject" type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Email subject" className="bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500" />
           </div>
-          <div className="flex flex-col flex-1 min-h-[300px] md:min-h-0">
+          <div className="flex flex-col flex-1 min-h-[200px]">
             <EditorToolbar />
             <div
                 ref={editorRef}
                 contentEditable
                 onInput={(e) => setBody(e.currentTarget.innerHTML)}
-                className="flex-1 bg-gray-800 border border-t-0 border-gray-700 rounded-b-md p-4 text-white resize-y overflow-y-auto focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 bg-gray-800 border border-t-0 border-gray-700 rounded-b-md p-4 text-white resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>
         {/* Gemini Instructions Panel */}
-        <div className="md:w-1/3 bg-gray-900 border border-gray-700 rounded-lg p-4 flex flex-col gap-4">
-          <h3 className="text-lg font-semibold text-white flex items-center"><WandIcon className="w-5 h-5 mr-2 text-primary-400"/>Instructions for Gemini</h3>
-          <select onChange={handleTemplateSelect} className="bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500" value={instructions}>
+        <div className="md:w-1/3 bg-gray-900 border border-gray-700 rounded-lg p-4 flex flex-col gap-4 min-h-0 overflow-y-auto">
+          <h3 className="text-lg font-semibold text-white flex items-center shrink-0"><WandIcon className="w-5 h-5 mr-2 text-primary-400"/>Instructions for Gemini</h3>
+          <select onChange={handleTemplateSelect} className="bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shrink-0" value={instructions}>
             <option value="">-- Use a template --</option>
             {templates.map(template => (
               <option key={template.id} value={template.instructions}>{template.name}</option>
@@ -234,73 +234,51 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
             placeholder="e.g., Write a polite email to John asking for the TPS reports by Friday."
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-md p-3 text-white resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-1 min-h-[100px] bg-gray-800 border border-gray-700 rounded-md p-3 text-white resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
             rows={10}
           />
           <button
             onClick={handleGenerate}
             disabled={isGenerating || isSending}
-            className="w-full flex justify-center items-center gap-2 bg-primary-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-primary-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center gap-2 bg-primary-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-primary-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed shrink-0"
           >
              {isGenerating ? 'Generating...' : 'Generate with AI'}
           </button>
         </div>
       </div>
-      {attachments.length > 0 && (
-          <div className="flex-shrink-0 flex flex-wrap gap-2 items-center p-2 border-t border-b border-gray-700">
-            {attachments.map((file, index) => (
-                <div key={index} className="bg-gray-700 text-sm rounded-full px-3 py-1 flex items-center gap-2">
-                    <span>{file.name}</span>
-                    <button onClick={() => removeAttachment(file)} className="hover:text-red-400" aria-label={`Remove ${file.name}`}><XIcon className="w-4 h-4" /></button>
-                </div>
-            ))}
-          </div>
-      )}
-      <div className="flex-shrink-0 flex items-center gap-4 flex-wrap">
-        <button onClick={handleSend} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-primary-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-primary-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
-            <SendIcon className="w-5 h-5"/> {isSending ? 'Sending...' : 'Send'}
-        </button>
-        <button onClick={handleSaveDraft} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
-            <DraftsIcon className="w-5 h-5"/> Save Draft
-        </button>
+      <div className="flex flex-col gap-4 shrink-0">
+        {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center p-2 border-t border-b border-gray-700">
+              {attachments.map((file, index) => (
+                  <div key={index} className="bg-gray-700 text-sm rounded-full px-3 py-1 flex items-center gap-2">
+                      <span>{file.name}</span>
+                      <button onClick={() => removeAttachment(file)} className="hover:text-red-400" aria-label={`Remove ${file.name}`}><XIcon className="w-4 h-4" /></button>
+                  </div>
+              ))}
+            </div>
+        )}
+        <div className="flex items-center gap-4 flex-wrap">
+          <button onClick={handleSend} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-primary-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-primary-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+              <SendIcon className="w-5 h-5"/> {isSending ? 'Sending...' : 'Send'}
+          </button>
+          <button onClick={handleSaveDraft} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+              <DraftsIcon className="w-5 h-5"/> Save Draft
+          </button>
 
-        {/* <button onClick={() => setShowScheduleModal(true)} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
-        <ClockIcon className="w-5 h-5"/> Schedule
-        </button> */}
-        <button onClick={() => fileInputRef.current?.click()} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
-            <PaperclipIcon className="w-5 h-5"/> Attach File
-        </button>
-        <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+          {/* <button onClick={() => setShowScheduleModal(true)} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+          <ClockIcon className="w-5 h-5"/> Schedule
+          </button> */}
+          <button onClick={() => fileInputRef.current?.click()} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+              <PaperclipIcon className="w-5 h-5"/> Attach File
+          </button>
+          <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+        </div>
       </div>
       {toastMessage && (
         <div className="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg animate-fade-in-out z-50">
           {toastMessage}
         </div>
       )}
-
-{/*      <ScheduleModal
-        isOpen={showScheduleModal}
-        onClose={() => setShowScheduleModal(false)}
-        onSchedule={(scheduledAt) => {
-          if (!to || !subject || !body.trim()) {
-            showToast('Please fill in all required fields before scheduling.');
-            return;
-          }
-          
-          const scheduledEmail: ScheduledEmail = {
-            id: crypto.randomUUID(),
-            to,
-            subject,
-            body,
-            attachments,
-            scheduledAt
-          };
-          
-          addScheduledEmail(scheduledEmail);
-          showToast('Email scheduled successfully!');
-          clearForm();
-        }}
-      />*/}
     </div>
   );
 };
