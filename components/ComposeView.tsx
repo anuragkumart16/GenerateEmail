@@ -263,7 +263,7 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
         <button onClick={handleSaveDraft} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
             <DraftsIcon className="w-5 h-5"/> Save Draft
         </button>
-        
+
         {/* <button onClick={() => setShowScheduleModal(true)} disabled={isSending || isGenerating} className="flex items-center gap-2 bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
         <ClockIcon className="w-5 h-5"/> Schedule
         </button> */}
@@ -278,7 +278,7 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
         </div>
       )}
 
-      <ScheduleModal
+{/*      <ScheduleModal
         isOpen={showScheduleModal}
         onClose={() => setShowScheduleModal(false)}
         onSchedule={(scheduledAt) => {
@@ -300,7 +300,7 @@ const ComposeView: React.FC<ComposeViewProps> = ({ initialInstruction, templates
           showToast('Email scheduled successfully!');
           clearForm();
         }}
-      />
+      />*/}
     </div>
   );
 };

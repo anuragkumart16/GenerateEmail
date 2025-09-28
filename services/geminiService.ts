@@ -1,10 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Email } from '../types';
 
-if (!process.env.GEMINI_API_KEY) {
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
   throw new Error('Gemini API Key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
 }
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 const SYSTEM_INSTRUCTION = `You are an AI assistant specialized in writing emails. 
 Your task is to generate only the body of the email based on the user's instructions.

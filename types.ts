@@ -49,6 +49,7 @@ export interface GoogleTokenResponse {
   expires_in: number;
   scope: string;
   token_type: string;
+  expiry_date?: number;  // Added for token expiration tracking
 }
 
 export interface UserProfile {
