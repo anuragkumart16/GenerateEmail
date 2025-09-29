@@ -148,7 +148,7 @@ export const useGoogleAuth = () => {
     }
   }, [tokenClient]);
 
-  // ---- INIT GOOGLE CLIENT (RUN ONCE) ----
+  // ---- INIT GOOGLE CLIENT ----
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || !window.google) return;
 
@@ -175,7 +175,7 @@ export const useGoogleAuth = () => {
         clearTimeout(refreshTimerRef.current);
       }
     };
-  }, []); // ✅ run only once
+  }, [handleAuthResponse, checkAndRefreshToken]); // Add necessary dependencies
 
   return { user, token, handleSignIn, handleSignOut };
 };
